@@ -1,0 +1,28 @@
+# Virtual environment
+venv/
+.env
+
+# Python cache files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Database files (if any local SQLite used)
+*.db
+*.sqlite3
+
+# VSCode / PyCharm settings
+.vscode/
+.idea/
+
+# Logs
+*.log
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# Uvicorn or coverage cache
+*.pid
+.coverage
+htmlcov/
