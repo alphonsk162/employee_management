@@ -65,3 +65,66 @@ pip install -r requirements.txt
 ```
 uvicorn main:app --reload
 ```
+
+
+## API Endpoints
+
+
+
+#### Get All Employees
+```http
+GET /employees/
+```
+Retrieves a list of all employees.
+
+#### Create Employee
+```http
+POST /employees/
+```
+Creates a new employee record.
+
+**Request Body:**
+```json
+{
+  "name": "string",
+  "email": "string",
+  "department": "string"
+}
+```
+
+
+#### Get Employee
+```http
+GET /employees/{emp_id}
+```
+Retrieves a specific employee by ID.
+
+**Parameters:**
+- `emp_id` (path parameter) - The unique identifier of the employee
+
+#### Update Employee
+```http
+PUT /employees/{emp_id}
+```
+Updates an existing employee record.
+
+**Parameters:**
+- `emp_id` (path parameter) - The unique identifier of the employee
+
+**Request Body:**
+```json
+{
+  "name": "string",
+  "email": "string",
+  "department": "string"
+}
+```
+
+#### Delete Employee
+```http
+DELETE /employees/{emp_id}
+```
+Deletes an employee record.
+
+**Parameters:**
+- `emp_id` (path parameter) - The unique identifier of the employee
