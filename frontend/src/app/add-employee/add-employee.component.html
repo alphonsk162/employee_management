@@ -1,0 +1,16 @@
+<div class="container">
+  <h2>Add Employee</h2>
+
+  <form (ngSubmit)="onSubmit()" #employeeForm="ngForm">
+    <label>Name:</label>
+    <input type="text" name="name" [(ngModel)]="employee.name" required />
+
+    <label>Email:</label>
+    <input type="email" name="email" [(ngModel)]="employee.email" required />
+
+    <label>Department:</label>
+    <input type="text" name="department" [(ngModel)]="employee.department" required />
+
+    <button type="submit">Add Employee</button>
+  </form>
+</div>

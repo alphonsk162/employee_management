@@ -2,8 +2,16 @@ from fastapi import FastAPI, HTTPException, Request
 from database import SessionLocal, Employee, engine
 from sqlalchemy import text
 from pydantic import BaseModel
-print(engine)
+from fastapi.middleware.cors import CORSMiddleware
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:4200"],  
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 class Employee(BaseModel):
     name: str

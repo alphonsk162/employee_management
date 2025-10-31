@@ -1,0 +1,22 @@
+<div class="edit-employee">
+  <h2>Edit Employee</h2>
+
+  <form [formGroup]="employeeForm" (ngSubmit)="onSave()">
+    <label>ID:</label>
+    <input type="text" formControlName="id" readonly />
+
+    <label>Name:</label>
+    <input type="text" formControlName="name" />
+
+    <label>Email:</label>
+    <input type="email" formControlName="email" />
+
+    <label>Department:</label>
+    <input type="text" formControlName="department" />
+
+    <div class="buttons">
+      <button type="submit">Save</button>
+      <button type="button" (click)="onCancel()">Cancel</button>
+    </div>
+  </form>
+</div>

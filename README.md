@@ -1,7 +1,8 @@
 # Employee Management API
 
-A simple **FastAPI + SQLAlchemy + MySQL** CRUD application to manage employees.  
-It supports creating, reading, updating, and deleting employee records.
+A full-stack **Employee Management System** with a FastAPI backend and Angular frontend.  
+This application provides a complete CRUD interface to manage employee records with a modern, user-friendly web interface.
+
 
 ---
 
@@ -19,21 +20,32 @@ It supports creating, reading, updating, and deleting employee records.
 ## Tech Stack
 
 - **Backend:** FastAPI  
+- **Frontend:** Angular
 - **Database:** MySQL  
 - **ORM:** SQLAlchemy  
+
 
 ---
 
 ## Project Structure
 ```
 employee_management
-├── database.py
-├── main.py
-├── __pycache__
-│   ├── database.cpython-312.pyc
-│   └── main.cpython-312.pyc
+├── backend
+│   ├── database.py
+│   ├── main.py
+│   ├── __pycache__
+│   └── requirements.txt
+├── frontend
+│   ├── angular.json
+│   ├── node_modules
+│   ├── package.json
+│   ├── package-lock.json
+│   ├── public
+│   ├── src
+│   ├── tsconfig.app.json
+│   ├── tsconfig.json
+│   └── tsconfig.spec.json
 ├── README.md
-├── requirements.txt
 ├── sample.env
 └── venv
 ```
@@ -44,6 +56,7 @@ employee_management
 ```
 git clone https://github.com/alphonsk162/employee_management
 cd employee_management
+cd backend
 ```
 
 ### 2. Create a virtual environment
@@ -66,6 +79,21 @@ pip install -r requirements.txt
 uvicorn main:app --reload
 ```
 
+### 6. Navigate to frontend directory
+```
+cd employee_management/frontend/employee-management-app
+```
+
+### 7. Install Angular dependencies
+```bash
+npm install
+```
+
+### 8. Run the Angular development server
+```bash
+ng serve
+```
+The application will be available at `http://localhost:4200`
 
 ## API Endpoints
 
@@ -128,3 +156,4 @@ Deletes an employee record.
 
 **Parameters:**
 - `emp_id` (path parameter) - The unique identifier of the employee
+
