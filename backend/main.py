@@ -1,8 +1,20 @@
-from fastapi import FastAPI, HTTPException, Request
-from database import SessionLocal, Employee, engine
+from fastapi import FastAPI, HTTPException, Request, Depends
+from database import SessionLocal, Employee, User, engine
 from sqlalchemy import text
 from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.security import OAuth2PasswordRequestForm
+from datetime import timedelta
+from auth import (
+    get_password_hash, 
+    verify_password, 
+    create_access_token, 
+    get_current_user,
+    ACCESS_TOKEN_EXPIRE_MINUTES,
+    get_db
+)
+from sqlalchemy.orm import Session
+
 app = FastAPI()
 
 app.add_middleware(
@@ -13,13 +25,55 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-class Employee(BaseModel):
+class EmployeeModel(BaseModel):
     name: str
     email: str
     department: str
 
+class UserRegister(BaseModel):
+    username: str
+    password: str
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+
+@app.post("/register")
+def register(user: UserRegister, db: Session = Depends(get_db)):
+    query = text("SELECT * FROM users WHERE username = :username")
+    existing_user = db.execute(query, {"username": user.username}).fetchone()
+    
+    if existing_user:
+        raise HTTPException(status_code=400, detail="Username already registered")
+    
+    hashed_password = get_password_hash(user.password)
+    query = text("INSERT INTO users (username, hashed_password) VALUES (:username, :hashed_password)")
+    db.execute(query, {"username": user.username, "hashed_password": hashed_password})
+    db.commit()
+    
+    return {"message": "User registered successfully"}
+
+@app.post("/login", response_model=Token)
+def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
+    query = text("SELECT * FROM users WHERE username = :username")
+    user = db.execute(query, {"username": form_data.username}).fetchone()
+    
+    if not user or not verify_password(form_data.password, user.hashed_password):
+        raise HTTPException(
+            status_code=401,
+            detail="Incorrect username or password",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    
+    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token = create_access_token(
+        data={"sub": user.username}, expires_delta=access_token_expires
+    )
+    
+    return {"access_token": access_token, "token_type": "bearer"}
+
 @app.post("/employees/")
-def create_employee(emp: Employee):
+def create_employee(emp: EmployeeModel, current_user = Depends(get_current_user)):
     data = emp.dict()
     db = SessionLocal()
     # using sql queries
@@ -34,7 +88,7 @@ def create_employee(emp: Employee):
     return {"message": "Employee added successfully"}
 
 @app.get("/employees/")
-def get_employees():
+def get_employees(current_user = Depends(get_current_user)):
     db = SessionLocal()
     # using sql queries
     query = text("SELECT * FROM employees")
@@ -45,28 +99,26 @@ def get_employees():
     db.close()
     return employees
 
-
 @app.get("/employees/{emp_id}")
-def get_employee(emp_id):
+def get_employee(emp_id, current_user = Depends(get_current_user)):
     db = SessionLocal()
-    # using sql queries
     query = text("SELECT * FROM employees WHERE id = :id")
-    emp = dict(db.execute(query, {"id": emp_id}).fetchone()._mapping)
-    # using orm
-    # emp = db.query(Employee).filter(Employee.id == emp_id).first()
+    result = db.execute(query, {"id": emp_id}).fetchone()
     db.close()
-    if not emp:
+    if not result:
         raise HTTPException(status_code=404, detail="Employee not found")
+    emp = dict(result._mapping)
     return emp
 
 @app.put("/employees/{emp_id}")
-def update_employee(emp_id, emp: Employee):
+def update_employee(emp_id, emp: EmployeeModel, current_user = Depends(get_current_user)):
     data = emp.dict()
     db = SessionLocal()
     # using sql queries
     query = text("UPDATE employees SET name = :name, email = :email, department = :department WHERE id = :id")
     result = db.execute(query, {"name": data["name"], "email": data["email"], "department": data["department"], "id": emp_id})
     if result.rowcount == 0:
+        db.close()
         raise HTTPException(status_code=404, detail="Employee not found")
     # using orm
     # emp = db.query(Employee).filter(Employee.id == emp_id).first()
@@ -82,12 +134,13 @@ def update_employee(emp_id, emp: Employee):
     return {"message": "Employee updated successfully"}
 
 @app.delete("/employees/{emp_id}")
-def delete_employee(emp_id):
+def delete_employee(emp_id, current_user = Depends(get_current_user)):
     db = SessionLocal()
     # using sql queries
     query = text("DELETE FROM employees WHERE id = :id")
     result = db.execute(query, {"id": emp_id})
     if result.rowcount == 0:
+        db.close()
         raise HTTPException(status_code=404, detail="Employee not found")
     # using orm
     # emp = db.query(Employee).filter(Employee.id == emp_id).first()

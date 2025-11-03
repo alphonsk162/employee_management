@@ -1,13 +1,20 @@
-<div class="employee-details" *ngIf="employee">
-  <div class="header">
-    <h2>Employee Details</h2>
-    <button class="edit-btn" [routerLink]="['/employee', employee.id, 'edit']">Edit</button>
-    <button class="delete-btn" (click)="deleteEmployee()">Delete</button>
+<div class="employee-details">
+  <div *ngIf="!employee">
+    <p>Employee not found</p>
   </div>
 
-  <p><strong>ID:</strong> {{ employee.id }}</p>
-  <p><strong>Name:</strong> {{ employee.name }}</p>
-  <p><strong>Email:</strong> {{ employee.email }}</p>
-  <p><strong>Department:</strong> {{ employee.department }}</p>
+  <div *ngIf="employee">
+    <div class="header">
+      <h2>Employee Details</h2>
+      <button class="edit-btn" [routerLink]="['/employee', employee.id, 'edit']">Edit</button>
+      <button class="delete-btn" (click)="deleteEmployee()">Delete</button>
+    </div>
+
+    <p><strong>ID:</strong> {{ employee.id }}</p>
+    <p><strong>Name:</strong> {{ employee.name }}</p>
+    <p><strong>Email:</strong> {{ employee.email }}</p>
+    <p><strong>Department:</strong> {{ employee.department }}</p>
+  </div>
 </div>
+
 
