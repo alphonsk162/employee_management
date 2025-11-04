@@ -14,6 +14,10 @@ from auth import (
     get_db
 )
 from sqlalchemy.orm import Session
+import os
+from fastapi import UploadFile, File, Form
+import shutil
+from fastapi.staticfiles import StaticFiles
 
 app = FastAPI()
 
@@ -24,11 +28,12 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
+app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 class EmployeeModel(BaseModel):
     name: str
     email: str
     department: str
+    file_details: str | None = None
 
 class UserRegister(BaseModel):
     username: str
@@ -64,7 +69,7 @@ def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depend
             detail="Incorrect username or password",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    
+
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
         data={"sub": user.username}, expires_delta=access_token_expires
@@ -72,28 +77,45 @@ def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depend
     
     return {"access_token": access_token, "token_type": "bearer"}
 
+UPLOAD_DIR = "uploads"
+os.makedirs(UPLOAD_DIR, exist_ok=True)
+
 @app.post("/employees/")
-def create_employee(emp: EmployeeModel, current_user = Depends(get_current_user)):
-    data = emp.dict()
+def create_employee(
+    name: str = Form(...),
+    email: str = Form(...),
+    department: str = Form(...),
+    file: UploadFile = File(...),
+    current_user = Depends(get_current_user)
+):
     db = SessionLocal()
-    # using sql queries
-    query = text("INSERT INTO employees (name, email, department) VALUES (:name, :email, :department)")
-    db.execute(query, {"name": data["name"], "email": data["email"], "department": data["department"]})
-    # using orm
-    # emp = Employee(name=data["name"], email=data["email"], department=data["department"])
-    # db.add(emp)
-    # db.refresh(emp)
+    file_path = os.path.join(UPLOAD_DIR, file.filename)
+    with open(file_path, "wb") as buffer:
+        shutil.copyfileobj(file.file, buffer)
+
+    query = text("""
+        INSERT INTO employees (name, email, department, file_details)
+        VALUES (:name, :email, :department, :file_details)
+    """)
+    db.execute(query, {
+        "name": name,
+        "email": email,
+        "department": department,
+        "file_details": file_path
+    })
+
     db.commit()
     db.close()
-    return {"message": "Employee added successfully"}
+
+    return {"message": "Employee added successfully", "file_path": file_path}
 
 @app.get("/employees/")
 def get_employees(current_user = Depends(get_current_user)):
     db = SessionLocal()
     # using sql queries
     query = text("SELECT * FROM employees")
-    eemployees_obj = db.execute(query).fetchall()
-    employees = [dict(row._mapping) for row in eemployees_obj]
+    employees_obj = db.execute(query).fetchall()
+    employees = [dict(row._mapping) for row in employees_obj]
     # using orm
     # employees = db.query(Employee).all()
     db.close()

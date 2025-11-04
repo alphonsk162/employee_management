@@ -11,6 +11,7 @@ DB_PASSWORD = os.getenv("DB_PASSWORD")
 DB_HOST = os.getenv("DB_HOST")
 DB_NAME = os.getenv("DB_NAME")
 
+
 SQLALCHEMY_DATABASE_URL = f"mysql+pymysql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}/{DB_NAME}"
 
 engine = create_engine(SQLALCHEMY_DATABASE_URL)
@@ -23,6 +24,7 @@ class Employee(Base):
     name = Column(String(255))
     email = Column(String(255))
     department = Column(String(100))
+    file_details = Column(String(255)) 
 
 class User(Base):
     __tablename__ = "users"

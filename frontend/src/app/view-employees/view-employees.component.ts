@@ -1,10 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { EmployeeService } from '../services/employee.service';
+import { FormsModule } from '@angular/forms'; 
 
 @Component({
   selector: 'app-view-employees',
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './view-employees.component.html',
   styleUrl: './view-employees.component.css'
 })

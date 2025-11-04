@@ -1,11 +1,11 @@
 <h2>Employee List</h2>
-
 <table border="1" cellpadding="6">
   <thead>
     <tr>
       <th>Name</th>
       <th>Email</th>
       <th>Department</th>
+      <th>File</th>
     </tr>
   </thead>
   <tbody>
@@ -13,6 +13,16 @@
       <td>{{ emp.name }}</td>
       <td>{{ emp.email }}</td>
       <td>{{ emp.department }}</td>
+
+      <td *ngIf="emp?.file_details; else noFile">
+        <a [href]="'http://127.0.0.1:8000/' + emp.file_details" target="_blank">
+          View File
+        </a>
+      </td>
     </tr>
   </tbody>
 </table>
+<ng-template #noFile>
+  <td>No File Uploaded</td>
+</ng-template>
+

@@ -14,6 +14,13 @@
     <p><strong>Name:</strong> {{ employee.name }}</p>
     <p><strong>Email:</strong> {{ employee.email }}</p>
     <p><strong>Department:</strong> {{ employee.department }}</p>
+<p>
+  <strong>File:</strong>
+  <a [href]="'http://127.0.0.1:8000/' + employee?.file_details" target="_blank">
+    View File
+  </a>
+</p>
+
   </div>
 </div>
 
