@@ -69,8 +69,6 @@ export class AuthService {
   }
 
   checkAuthentication(): boolean {
-    console.log('Checking authentication status');
-    console.log('Token present:', this.hasToken());
     return this.hasToken();
   }
 }

@@ -19,7 +19,26 @@ from fastapi import UploadFile, File, Form
 import shutil
 from fastapi.staticfiles import StaticFiles
 
+from logging_config import setup_logging
+from exception_handlers import (
+    http_exception_handler,
+    validation_exception_handler,
+    sqlalchemy_exception_handler,
+    generic_exception_handler,
+)
+from fastapi.exceptions import RequestValidationError
+from sqlalchemy.exc import SQLAlchemyError
+import logging
+
 app = FastAPI()
+
+logger = setup_logging()
+logger.info("Application startup complete")
+
+app.add_exception_handler(HTTPException, http_exception_handler)
+app.add_exception_handler(RequestValidationError, validation_exception_handler)
+app.add_exception_handler(SQLAlchemyError, sqlalchemy_exception_handler)
+app.add_exception_handler(Exception, generic_exception_handler)
 
 app.add_middleware(
     CORSMiddleware,
@@ -127,8 +146,8 @@ def get_employee(emp_id, current_user = Depends(get_current_user)):
     query = text("SELECT * FROM employees WHERE id = :id")
     result = db.execute(query, {"id": emp_id}).fetchone()
     db.close()
-    if not result:
-        raise HTTPException(status_code=404, detail="Employee not found")
+    # if not result:
+    #     raise HTTPException(status_code=404, detail="Employee not found")
     emp = dict(result._mapping)
     return emp
 

@@ -3,8 +3,9 @@
   <a routerLink="/view-employees" routerLinkActive="active">Employees</a>
   <a routerLink="/add-employee" routerLinkActive="active">Add Employee</a>
   <div class="search-bar">
-    <input type="number" [(ngModel)]="searchId" placeholder="Enter Employee ID" />
+    <input type="number" [(ngModel)]="searchId" placeholder="Enter Employee ID"/>
     <button (click)="searchEmployee()">Search</button>
+    <button *ngIf="isLoggedIn$ | async" (click)="logout()">Logout</button>
   </div>
 </nav>
 <router-outlet></router-outlet>
