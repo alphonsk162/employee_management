@@ -22,6 +22,11 @@
     </tr>
   </tbody>
 </table>
+<div style="margin-top: 15px;">
+  <a href="#" *ngIf="hasPrev" (click)="prevPage(); $event.preventDefault()">← Prev</a>
+  <span *ngIf="hasPrev && hasNext"> | </span>
+  <a href="#" *ngIf="hasNext" (click)="nextPage(); $event.preventDefault()">Next →</a>
+</div>
 <ng-template #noFile>
   <td>No File Uploaded</td>
 </ng-template>

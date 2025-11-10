@@ -18,6 +18,8 @@ import os
 from fastapi import UploadFile, File, Form
 import shutil
 from fastapi.staticfiles import StaticFiles
+from fastapi import Query
+
 
 from logging_config import setup_logging
 from exception_handlers import (
@@ -129,16 +131,36 @@ def create_employee(
     return {"message": "Employee added successfully", "file_path": file_path}
 
 @app.get("/employees/")
-def get_employees(current_user = Depends(get_current_user)):
-    db = SessionLocal()
-    # using sql queries
-    query = text("SELECT * FROM employees")
-    employees_obj = db.execute(query).fetchall()
-    employees = [dict(row._mapping) for row in employees_obj]
-    # using orm
-    # employees = db.query(Employee).all()
-    db.close()
-    return employees
+def get_employees(
+    skip: int = Query(0, ge=0),
+    limit: int = Query(10, gt=0),
+    db: Session = Depends(get_db),
+    current_user = Depends(get_current_user)
+):
+    try:
+        count_query = text("SELECT COUNT(*) FROM employees")
+        total = db.execute(count_query).scalar()
+
+        data_query = text("""
+            SELECT * FROM employees
+            ORDER BY id
+            LIMIT :limit OFFSET :skip
+        """)
+        result = db.execute(data_query, {"limit": limit, "skip": skip}).fetchall()
+        employees = [dict(row._mapping) for row in result]
+
+        has_next = skip + limit < total
+        has_prev = skip > 0
+
+        return {
+            "employees": employees,
+            "total": total,
+            "has_next": has_next,
+            "has_prev": has_prev
+        }
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error fetching employees: {str(e)}")
 
 @app.get("/employees/{emp_id}")
 def get_employee(emp_id, current_user = Depends(get_current_user)):
